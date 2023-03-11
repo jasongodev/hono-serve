@@ -72,7 +72,7 @@ export type HonoVercelReturn = (req: Request, res: Response) => Response | Promi
 
 export type HonoServe = HonoBunReturn | HonoCloudflareReturn | HonoFastlyReturn | HonoNextjsReturn | HonoVercelReturn | Hono
 
-export const serve = (app: Hono, options: HonoServeOptions): HonoServe => {
+export const serve = (app: Hono, options?: HonoServeOptions): HonoServe => {
   const runtime = getRuntime()
   if (runtime === 'workerd') return app
   switch (runtime) {
