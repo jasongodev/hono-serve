@@ -1,4 +1,4 @@
-import { Hono, Env } from 'hono'
+import { Hono } from 'hono'
 import { handle } from 'hono/nextjs'
 
 export function getRuntime (): string {
@@ -72,7 +72,7 @@ export type HonoVercelReturn = (req: Request, res: Response) => Response | Promi
 
 export type HonoServe = HonoBunReturn | HonoCloudflareReturn | HonoFastlyReturn | HonoNextjsReturn | HonoVercelReturn | Hono
 
-export const serve = <E extends Env>(app: Hono<E>, options?: HonoServeOptions): HonoServe => {
+export const serve = (app: Hono, options?: HonoServeOptions): HonoServe => {
   const runtime = getRuntime()
   if (runtime === 'workerd') return app
   switch (runtime) {
