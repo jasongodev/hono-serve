@@ -14,7 +14,10 @@
     "fastly",
     "compute@edge",
     "next.js",
+    "nextjs",
     "vercel",
+    "edge",
+    "serverless",
     "runtime",
     "adapter"
   ],
