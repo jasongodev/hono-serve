@@ -1,15 +1,28 @@
 {
   "name": "hono-omniserve",
-  "version": "0.1.0",
-  "description": "Make hono apps cross-compatible by ending it with 'export default serve(app)'. Works with Bun, Cloudflare Workers, Deno, Fastly@Edge, Nex.js, and Vercel runtimes.",
+  "version": "0.0.1",
+  "description": "Make hono apps cross-compatible by ending it with 'export default serve(app)'. Works with Bun, Cloudflare Workers, Deno, Fastly Compute@Edge, Next.js, and Vercel runtimes.",
+  "author": "Jason Go <jasongo@jasongo.net>",
+  "license": "MIT",
+  "keywords": [
+    "hono",
+    "router",
+    "bun",
+    "cloudflare",
+    "workers",
+    "deno",
+    "fastly",
+    "compute@edge",
+    "next.js",
+    "vercel",
+    "runtime",
+    "adapter"
+  ],
   "main": "./dist/index.ts",
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "rimraf ./dist && tsc"
   },
-  "keywords": [],
-  "author": "",
-  "license": "MIT",
   "dependencies": {
     "hono": "^3.0.3"
   },
