@@ -1,1 +1,1 @@
-# hono-omniserve
+# hono-serve
