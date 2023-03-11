@@ -1,7 +1,6 @@
 import { Hono } from 'hono';
 import { handle } from 'hono/nextjs';
 export function getRuntime() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const global = globalThis;
     if (global?.Deno !== undefined) {
         return 'deno';
@@ -17,9 +16,6 @@ export function getRuntime() {
     }
     let onFastly = false;
     try {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
         const { env } = require('fastly:env');
         if (env instanceof Function)
             onFastly = true;
