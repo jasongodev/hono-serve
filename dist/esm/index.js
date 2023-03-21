@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { handle } from 'hono/nextjs';
+import { serve as nodeServer } from '@hono/node-server';
 export function getRuntime() {
     const global = globalThis;
     if (global?.Deno !== undefined) {
@@ -44,11 +45,28 @@ export const serve = (app, options) => {
             };
         case 'edge-light':
             return handle(app, options?.nextjs?.path ?? '/api');
-        case 'vercel':
-            return async (req, res) => {
-                const subApp = new Hono().route(options?.vercel?.path ?? '/api', app);
-                return await subApp.fetch(req);
-            };
+        case 'node':
+            if (global.process.env.VERCEL === '1') {
+                return async (vRequest, vResponse) => {
+                    const subApp = new Hono().route(options?.vercel?.path ?? '/api', app);
+                    const trueURL = global.process.env.VERCEL_ENV === 'development' ? `https://${global.process.env.VERCEL_URL}${vRequest.url}` : vRequest.url;
+                    const stdRequest = new Request(trueURL, {
+                        method: vRequest.method,
+                        body: vRequest.body
+                    });
+                    Object.keys(vRequest.headers).forEach((name) => {
+                        stdRequest.headers.set(name, vRequest.headers[name]);
+                    });
+                    const honoResponse = await subApp.fetch(stdRequest);
+                    honoResponse.headers.forEach((value, name) => {
+                        vResponse.setHeader(name, value);
+                    });
+                    return vResponse
+                        .status(honoResponse.status)
+                        .send(Buffer.from(await honoResponse.arrayBuffer()));
+                };
+            }
+            return nodeServer(app);
         case 'fastly':
             app.fire();
     }

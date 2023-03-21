@@ -1,4 +1,7 @@
+/// <reference types="node" />
 import { Hono, Env } from 'hono';
+import type { Server as nodeServerType } from 'node:http';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 export declare function getRuntime(): string;
 export interface HonoServeOptions {
     bun?: {
@@ -19,6 +22,7 @@ export interface HonoBunReturn {
 export type HonoCloudflareReturn = Hono;
 export type HonoFastlyReturn = Hono;
 export type HonoNextjsReturn = (req: Request) => Response | Promise<Response>;
-export type HonoVercelReturn = (req: Request, res: Response) => Response | Promise<Response>;
-export type HonoServe = HonoBunReturn | HonoCloudflareReturn | HonoFastlyReturn | HonoNextjsReturn | HonoVercelReturn | Hono;
+export type HonoNodeReturn = nodeServerType;
+export type HonoVercelNodeReturn = (req: VercelRequest, res: VercelResponse) => VercelResponse | Promise<VercelResponse>;
+export type HonoServe = HonoBunReturn | HonoCloudflareReturn | HonoFastlyReturn | HonoNextjsReturn | HonoNodeReturn | HonoVercelNodeReturn;
 export declare const serve: <E extends Env>(app: Hono<E, {}, "">, options?: HonoServeOptions) => HonoServe;
