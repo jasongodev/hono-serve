@@ -49,8 +49,7 @@ export const serve = (app, options) => {
             if (global.process.env.VERCEL === '1') {
                 return async (vRequest, vResponse) => {
                     const subApp = new Hono().route(options?.vercel?.path ?? '/api', app);
-                    const trueURL = global.process.env.VERCEL_ENV === 'development' ? `https://${global.process.env.VERCEL_URL}${vRequest.url}` : vRequest.url;
-                    const stdRequest = new Request(trueURL, {
+                    const stdRequest = new Request(`https://${global.process.env.VERCEL_URL}${vRequest.url}`, {
                         method: vRequest.method,
                         body: vRequest.body
                     });

@@ -91,10 +91,10 @@ export const serve = <E extends Env>(app: Hono<E>, options?: HonoServeOptions): 
         return async (vRequest: VercelRequest, vResponse: VercelResponse): Promise<VercelResponse> => {
           const subApp = new Hono().route(options?.vercel?.path ?? '/api', app)
 
-          const trueURL = global.process.env.VERCEL_ENV === 'development' ? `https://${global.process.env.VERCEL_URL as string}${vRequest.url as string}` : vRequest.url as string
+          // const trueURL = global.process.env.VERCEL_ENV === 'development' ? `https://${global.process.env.VERCEL_URL as string}${vRequest.url as string}` : vRequest.url as string
 
           // Transform vRequest into stdRequest which is compatible with Hono's fetch
-          const stdRequest = new Request(trueURL, {
+          const stdRequest = new Request(`https://${global.process.env.VERCEL_URL as string}${vRequest.url as string}`, {
             method: vRequest.method as string,
             body: vRequest.body
           })

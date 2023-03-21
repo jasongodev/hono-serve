@@ -90,14 +90,13 @@ var serve = function (app, options) {
         case 'node':
             if (global.process.env.VERCEL === '1') {
                 return function (vRequest, vResponse) { return __awaiter(void 0, void 0, void 0, function () {
-                    var subApp, trueURL, stdRequest, honoResponse, _a, _b, _c, _d;
+                    var subApp, stdRequest, honoResponse, _a, _b, _c, _d;
                     var _e, _f;
                     return __generator(this, function (_g) {
                         switch (_g.label) {
                             case 0:
                                 subApp = new hono_1.Hono().route((_f = (_e = options === null || options === void 0 ? void 0 : options.vercel) === null || _e === void 0 ? void 0 : _e.path) !== null && _f !== void 0 ? _f : '/api', app);
-                                trueURL = global.process.env.VERCEL_ENV === 'development' ? "https://".concat(global.process.env.VERCEL_URL).concat(vRequest.url) : vRequest.url;
-                                stdRequest = new Request(trueURL, {
+                                stdRequest = new Request("https://".concat(global.process.env.VERCEL_URL).concat(vRequest.url), {
                                     method: vRequest.method,
                                     body: vRequest.body
                                 });
