@@ -1,6 +1,6 @@
 {
   "name": "hono-serve",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "A cross-compatible serve() function for hono apps. Just use 'export default serve(app)'. Works with Bun, Cloudflare Workers, Deno, Fastly Compute@Edge, Next.js, and Vercel runtimes.",
   "author": "Jason Go <jasongo@jasongo.net>",
   "license": "MIT",

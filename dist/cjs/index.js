@@ -1,4 +1,27 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -39,7 +62,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.serve = exports.getRuntime = void 0;
 var hono_1 = require("hono");
 var nextjs_1 = require("hono/nextjs");
-var node_server_1 = require("@hono/node-server");
 function getRuntime() {
     var _a, _b;
     var global = globalThis;
@@ -74,55 +96,68 @@ function getRuntime() {
     return 'other';
 }
 exports.getRuntime = getRuntime;
-var serve = function (app, options) {
-    var _a, _b, _c, _d;
-    var runtime = getRuntime();
-    if (runtime === 'workerd')
-        return app;
-    switch (runtime) {
-        case 'bun':
-            return {
-                port: (_b = (_a = options === null || options === void 0 ? void 0 : options.bun) === null || _a === void 0 ? void 0 : _a.port) !== null && _b !== void 0 ? _b : 3000,
-                fetch: app.fetch
-            };
-        case 'edge-light':
-            return (0, nextjs_1.handle)(app, (_d = (_c = options === null || options === void 0 ? void 0 : options.nextjs) === null || _c === void 0 ? void 0 : _c.path) !== null && _d !== void 0 ? _d : '/api');
-        case 'node':
-            if (global.process.env.VERCEL === '1') {
-                return function (vRequest, vResponse) { return __awaiter(void 0, void 0, void 0, function () {
-                    var subApp, stdRequest, honoResponse, _a, _b, _c, _d;
-                    var _e, _f;
-                    return __generator(this, function (_g) {
-                        switch (_g.label) {
-                            case 0:
-                                subApp = new hono_1.Hono().route((_f = (_e = options === null || options === void 0 ? void 0 : options.vercel) === null || _e === void 0 ? void 0 : _e.path) !== null && _f !== void 0 ? _f : '/api', app);
-                                stdRequest = new Request("https://".concat(global.process.env.VERCEL_URL).concat(vRequest.url), {
-                                    method: vRequest.method,
-                                    body: vRequest.body
-                                });
-                                Object.keys(vRequest.headers).forEach(function (name) {
-                                    stdRequest.headers.set(name, vRequest.headers[name]);
-                                });
-                                return [4, subApp.fetch(stdRequest)];
-                            case 1:
-                                honoResponse = _g.sent();
-                                honoResponse.headers.forEach(function (value, name) {
-                                    vResponse.setHeader(name, value);
-                                });
-                                _b = (_a = vResponse
-                                    .status(honoResponse.status))
-                                    .send;
-                                _d = (_c = Buffer).from;
-                                return [4, honoResponse.arrayBuffer()];
-                            case 2: return [2, _b.apply(_a, [_d.apply(_c, [_g.sent()])])];
-                        }
-                    });
-                }); };
-            }
-            return (0, node_server_1.serve)(app);
-        case 'fastly':
-            app.fire();
-    }
-    return app;
-};
+var serve = function (app, options) { return __awaiter(void 0, void 0, void 0, function () {
+    var runtime, _a, serve_1;
+    var _b, _c, _d, _e;
+    return __generator(this, function (_f) {
+        switch (_f.label) {
+            case 0:
+                runtime = getRuntime();
+                if (runtime === 'workerd')
+                    return [2, app];
+                _a = runtime;
+                switch (_a) {
+                    case 'bun': return [3, 1];
+                    case 'edge-light': return [3, 2];
+                    case 'node': return [3, 3];
+                    case 'fastly': return [3, 6];
+                }
+                return [3, 7];
+            case 1: return [2, {
+                    port: (_c = (_b = options === null || options === void 0 ? void 0 : options.bun) === null || _b === void 0 ? void 0 : _b.port) !== null && _c !== void 0 ? _c : 3000,
+                    fetch: app.fetch
+                }];
+            case 2: return [2, (0, nextjs_1.handle)(app, (_e = (_d = options === null || options === void 0 ? void 0 : options.nextjs) === null || _d === void 0 ? void 0 : _d.path) !== null && _e !== void 0 ? _e : '/api')];
+            case 3:
+                if (!(global.process.env.VERCEL === '1')) return [3, 4];
+                return [2, function (vRequest, vResponse) { return __awaiter(void 0, void 0, void 0, function () {
+                        var subApp, stdRequest, honoResponse, _a, _b, _c, _d;
+                        var _e, _f;
+                        return __generator(this, function (_g) {
+                            switch (_g.label) {
+                                case 0:
+                                    subApp = new hono_1.Hono().route((_f = (_e = options === null || options === void 0 ? void 0 : options.vercel) === null || _e === void 0 ? void 0 : _e.path) !== null && _f !== void 0 ? _f : '/api', app);
+                                    stdRequest = new Request("https://".concat(global.process.env.VERCEL_URL).concat(vRequest.url), {
+                                        method: vRequest.method,
+                                        body: vRequest.body
+                                    });
+                                    Object.keys(vRequest.headers).forEach(function (name) {
+                                        stdRequest.headers.set(name, vRequest.headers[name]);
+                                    });
+                                    return [4, subApp.fetch(stdRequest)];
+                                case 1:
+                                    honoResponse = _g.sent();
+                                    honoResponse.headers.forEach(function (value, name) {
+                                        vResponse.setHeader(name, value);
+                                    });
+                                    _b = (_a = vResponse
+                                        .status(honoResponse.status))
+                                        .send;
+                                    _d = (_c = Buffer).from;
+                                    return [4, honoResponse.arrayBuffer()];
+                                case 2: return [2, _b.apply(_a, [_d.apply(_c, [_g.sent()])])];
+                            }
+                        });
+                    }); }];
+            case 4: return [4, Promise.resolve().then(function () { return __importStar(require('@hono/node-server')); })];
+            case 5:
+                serve_1 = (_f.sent()).serve;
+                return [2, serve_1(app)];
+            case 6:
+                app.fire();
+                _f.label = 7;
+            case 7: return [2, app];
+        }
+    });
+}); };
 exports.serve = serve;

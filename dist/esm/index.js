@@ -1,6 +1,5 @@
 import { Hono } from 'hono';
 import { handle } from 'hono/nextjs';
-import { serve as nodeServer } from '@hono/node-server';
 export function getRuntime() {
     const global = globalThis;
     if (global?.Deno !== undefined) {
@@ -33,7 +32,7 @@ export function getRuntime() {
     }
     return 'other';
 }
-export const serve = (app, options) => {
+export const serve = async (app, options) => {
     const runtime = getRuntime();
     if (runtime === 'workerd')
         return app;
@@ -65,7 +64,10 @@ export const serve = (app, options) => {
                         .send(Buffer.from(await honoResponse.arrayBuffer()));
                 };
             }
-            return nodeServer(app);
+            else {
+                const { serve } = await import('@hono/node-server');
+                return serve(app);
+            }
         case 'fastly':
             app.fire();
     }
