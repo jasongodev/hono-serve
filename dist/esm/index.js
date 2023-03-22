@@ -32,7 +32,7 @@ export function getRuntime() {
     }
     return 'other';
 }
-export const serve = async (app, options) => {
+export const serve = (app, options) => {
     const runtime = getRuntime();
     if (runtime === 'workerd')
         return app;
@@ -65,8 +65,10 @@ export const serve = async (app, options) => {
                 };
             }
             else {
-                const { serve } = await import('@hono/node-server');
-                return serve(app);
+                return (async () => {
+                    const { serve } = await import('@hono/node-server');
+                    return serve(app);
+                })();
             }
         case 'fastly':
             app.fire();

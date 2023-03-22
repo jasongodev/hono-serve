@@ -22,7 +22,7 @@ export interface HonoBunReturn {
 export type HonoCloudflareReturn = Hono;
 export type HonoFastlyReturn = Hono;
 export type HonoNextjsReturn = (req: Request) => Response | Promise<Response>;
-export type HonoNodeReturn = nodeServerType;
+export type HonoNodeReturn = nodeServerType | Promise<nodeServerType>;
 export type HonoVercelNodeReturn = (req: VercelRequest, res: VercelResponse) => VercelResponse | Promise<VercelResponse>;
 export type HonoServe = HonoBunReturn | HonoCloudflareReturn | HonoFastlyReturn | HonoNextjsReturn | HonoNodeReturn | HonoVercelNodeReturn;
-export declare const serve: <E extends Env>(app: Hono<E, {}, "">, options?: HonoServeOptions) => Promise<HonoServe>;
+export declare const serve: <E extends Env>(app: Hono<E, {}, "">, options?: HonoServeOptions) => HonoServe;
