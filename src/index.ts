@@ -75,53 +75,55 @@ export type HonoVercelNodeReturn = (req: VercelRequest, res: VercelResponse) => 
 
 export type HonoServe = HonoBunReturn | HonoCloudflareReturn | HonoFastlyReturn | HonoNextjsReturn | HonoNodeReturn | HonoVercelNodeReturn
 
-export const serve = async <E extends Env>(app: Hono<E>, options?: HonoServeOptions): Promise<HonoServe> => {
-  const runtime = getRuntime()
-  if (runtime === 'workerd') return app
-  switch (runtime) {
-    case 'bun':
-      return {
-        port: options?.bun?.port ?? 3000,
-        fetch: app.fetch
+const runtime = getRuntime()
+
+export const serve = runtime === 'node'
+  ? async <E extends Env>(app: Hono<E>, options?: HonoServeOptions): Promise<HonoServe> => {
+    if (global.process.env.VERCEL === '1') {
+      return async (vRequest: VercelRequest, vResponse: VercelResponse): Promise<VercelResponse> => {
+        const subApp = new Hono().route(options?.vercel?.path ?? '/api', app)
+
+        // const trueURL = global.process.env.VERCEL_ENV === 'development' ? `https://${global.process.env.VERCEL_URL as string}${vRequest.url as string}` : vRequest.url as string
+
+        // Transform vRequest into stdRequest which is compatible with Hono's fetch
+        const stdRequest = new Request(`https://${global.process.env.VERCEL_URL as string}${vRequest.url as string}`, {
+          method: vRequest.method as string,
+          body: vRequest.body
+        })
+
+        // Copy vRequest's headers into stdRequest
+        Object.keys(vRequest.headers).forEach((name: string) => {
+          stdRequest.headers.set(name, vRequest.headers[name] as string)
+        })
+
+        // Process stdRequest using Hono
+        const honoResponse = await subApp.fetch(stdRequest)
+
+        // Copy honoResponse into vResponse
+        honoResponse.headers.forEach((value: string, name: string) => {
+          vResponse.setHeader(name, value)
+        })
+
+        return vResponse
+          .status(honoResponse.status)
+          .send(Buffer.from(await honoResponse.arrayBuffer()))
       }
-    case 'edge-light':
-      return handle(app, options?.nextjs?.path ?? '/api')
-    case 'node':
-      if (global.process.env.VERCEL === '1') {
-        return async (vRequest: VercelRequest, vResponse: VercelResponse): Promise<VercelResponse> => {
-          const subApp = new Hono().route(options?.vercel?.path ?? '/api', app)
-
-          // const trueURL = global.process.env.VERCEL_ENV === 'development' ? `https://${global.process.env.VERCEL_URL as string}${vRequest.url as string}` : vRequest.url as string
-
-          // Transform vRequest into stdRequest which is compatible with Hono's fetch
-          const stdRequest = new Request(`https://${global.process.env.VERCEL_URL as string}${vRequest.url as string}`, {
-            method: vRequest.method as string,
-            body: vRequest.body
-          })
-
-          // Copy vRequest's headers into stdRequest
-          Object.keys(vRequest.headers).forEach((name: string) => {
-            stdRequest.headers.set(name, vRequest.headers[name] as string)
-          })
-
-          // Process stdRequest using Hono
-          const honoResponse = await subApp.fetch(stdRequest)
-
-          // Copy honoResponse into vResponse
-          honoResponse.headers.forEach((value: string, name: string) => {
-            vResponse.setHeader(name, value)
-          })
-
-          return vResponse
-            .status(honoResponse.status)
-            .send(Buffer.from(await honoResponse.arrayBuffer()))
-        }
-      } else {
-        const { serve } = await import('@hono/node-server')
-        return serve(app)
-      }
-    case 'fastly':
-      app.fire()
+    } else {
+      const { serve } = await import('@hono/node-server')
+      return serve(app)
+    }
   }
-  return app
-}
+  : <E extends Env>(app: Hono<E>, options?: HonoServeOptions): HonoServe => {
+    switch (runtime) {
+      case 'bun':
+        return {
+          port: options?.bun?.port ?? 3000,
+          fetch: app.fetch
+        }
+      case 'edge-light':
+        return handle(app, options?.nextjs?.path ?? '/api')
+      case 'fastly':
+        app.fire()
+    }
+    return app
+  }
