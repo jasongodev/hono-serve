@@ -34,8 +34,6 @@ export function getRuntime() {
 }
 export const serve = (app, options) => {
     const runtime = getRuntime();
-    if (runtime === 'workerd')
-        return app;
     switch (runtime) {
         case 'bun':
             return {
@@ -65,10 +63,7 @@ export const serve = (app, options) => {
                 };
             }
             else {
-                return (async () => {
-                    const { serve } = await import('@hono/node-server');
-                    return serve(app);
-                })();
+                return import('@hono/node-server').then(({ serve }) => { return serve(app); });
             }
         case 'fastly':
             app.fire();

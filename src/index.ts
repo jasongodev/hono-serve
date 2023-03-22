@@ -1,6 +1,5 @@
 import { Hono, Env } from 'hono'
 import { handle } from 'hono/nextjs'
-// import { serve as nodeServer } from '@hono/node-server'
 import type { Server as nodeServerType } from 'node:http'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
@@ -77,7 +76,6 @@ export type HonoServe = HonoBunReturn | HonoCloudflareReturn | HonoFastlyReturn 
 
 export const serve = <E extends Env>(app: Hono<E>, options?: HonoServeOptions): HonoServe => {
   const runtime = getRuntime()
-  if (runtime === 'workerd') return app
   switch (runtime) {
     case 'bun':
       return {
@@ -117,10 +115,11 @@ export const serve = <E extends Env>(app: Hono<E>, options?: HonoServeOptions): 
             .send(Buffer.from(await honoResponse.arrayBuffer()))
         }
       } else {
-        return (async (): Promise<nodeServerType> => {
+        return import('@hono/node-server').then(({ serve }) => { return serve(app) })
+        /* return (async (): Promise<nodeServerType> => {
           const { serve } = await import('@hono/node-server')
           return serve(app)
-        })()
+        })() */
       }
     case 'fastly':
       app.fire()

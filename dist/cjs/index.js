@@ -99,8 +99,6 @@ exports.getRuntime = getRuntime;
 var serve = function (app, options) {
     var _a, _b, _c, _d;
     var runtime = getRuntime();
-    if (runtime === 'workerd')
-        return app;
     switch (runtime) {
         case 'bun':
             return {
@@ -142,17 +140,10 @@ var serve = function (app, options) {
                 }); };
             }
             else {
-                return (function () { return __awaiter(void 0, void 0, void 0, function () {
-                    var serve;
-                    return __generator(this, function (_a) {
-                        switch (_a.label) {
-                            case 0: return [4, Promise.resolve().then(function () { return __importStar(require('@hono/node-server')); })];
-                            case 1:
-                                serve = (_a.sent()).serve;
-                                return [2, serve(app)];
-                        }
-                    });
-                }); })();
+                return Promise.resolve().then(function () { return __importStar(require('@hono/node-server')); }).then(function (_a) {
+                    var serve = _a.serve;
+                    return serve(app);
+                });
             }
         case 'fastly':
             app.fire();
