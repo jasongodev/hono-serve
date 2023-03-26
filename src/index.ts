@@ -66,7 +66,7 @@ export type HonoCloudflareReturn = Hono
 
 export type HonoFastlyReturn = Hono
 
-export type HonoLagonReturn = Hono
+export type HonoLagonReturn = (req: Request) => Response | Promise<Response>
 
 export type HonoNextjsReturn = (req: Request) => Response | Promise<Response>
 
@@ -107,7 +107,7 @@ export const serve = <E extends Env>(app: Hono<E>, options?: HonoServeOptions): 
             .send(Buffer.from(await honoResponse.arrayBuffer()))
         }
       } else {
-        return import('@hono/node-server').then(({ serve }) => serve(app))
+        return import('@hono/node-server').then(({ serve }) => { return serve(app) })
       }
     case 'bun':
       return {

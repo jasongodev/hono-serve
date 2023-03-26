@@ -55,7 +55,7 @@ export const serve = (app, options) => {
                 };
             }
             else {
-                return import('@hono/node-server').then(({ serve }) => serve(app));
+                return import('@hono/node-server').then(({ serve }) => { return serve(app); });
             }
         case 'bun':
             return {
