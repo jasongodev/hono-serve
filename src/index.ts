@@ -81,8 +81,6 @@ export const serve = <E extends Env>(app: Hono<E>, options?: HonoServeOptions): 
     case 'node':
       if (global.process.env.VERCEL === '1') {
         return async (vRequest: VercelRequest, vResponse: VercelResponse): Promise<VercelResponse> => {
-          const subApp = new Hono().route(options?.vercel?.path ?? '/api', app)
-
           // Transform vRequest into stdRequest which is compatible with Hono's fetch
           const stdRequest = new Request(`https://${global.process.env.VERCEL_URL as string}${vRequest.url as string}`, {
             method: vRequest.method as string,
@@ -95,7 +93,7 @@ export const serve = <E extends Env>(app: Hono<E>, options?: HonoServeOptions): 
           })
 
           // Process stdRequest using Hono
-          const honoResponse = await subApp.fetch(stdRequest)
+          const honoResponse = await app.basePath(options?.vercel?.path ?? '/api').fetch(stdRequest)
 
           // Copy honoResponse into vResponse
           honoResponse.headers.forEach((value: string, name: string) => {
@@ -107,7 +105,7 @@ export const serve = <E extends Env>(app: Hono<E>, options?: HonoServeOptions): 
             .send(Buffer.from(await honoResponse.arrayBuffer()))
         }
       } else {
-        return import('@hono/node-server').then(({ serve }) => { return serve(app) })
+        return import('@hono/node-server').then(({ serve }) => serve(app))
       }
     case 'bun':
       return {
@@ -115,7 +113,7 @@ export const serve = <E extends Env>(app: Hono<E>, options?: HonoServeOptions): 
         fetch: app.fetch
       }
     case 'edge-light':
-      return handle(app, options?.nextjs?.path ?? '/api')
+      return handle(app.basePath(options?.nextjs?.path ?? '/api'))
     case 'lagon':
       return app.fetch
     case 'fastly':

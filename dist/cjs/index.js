@@ -60,7 +60,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.serve = exports.getRuntime = void 0;
-var hono_1 = require("hono");
 var nextjs_1 = require("hono/nextjs");
 function getRuntime() {
     var _a, _b;
@@ -102,12 +101,11 @@ var serve = function (app, options) {
         case 'node':
             if (global.process.env.VERCEL === '1') {
                 return function (vRequest, vResponse) { return __awaiter(void 0, void 0, void 0, function () {
-                    var subApp, stdRequest, honoResponse, _a, _b, _c, _d;
+                    var stdRequest, honoResponse, _a, _b, _c, _d;
                     var _e, _f;
                     return __generator(this, function (_g) {
                         switch (_g.label) {
                             case 0:
-                                subApp = new hono_1.Hono().route((_f = (_e = options === null || options === void 0 ? void 0 : options.vercel) === null || _e === void 0 ? void 0 : _e.path) !== null && _f !== void 0 ? _f : '/api', app);
                                 stdRequest = new Request("https://".concat(global.process.env.VERCEL_URL).concat(vRequest.url), {
                                     method: vRequest.method,
                                     body: vRequest.body
@@ -115,7 +113,7 @@ var serve = function (app, options) {
                                 Object.keys(vRequest.headers).forEach(function (name) {
                                     stdRequest.headers.set(name, vRequest.headers[name]);
                                 });
-                                return [4, subApp.fetch(stdRequest)];
+                                return [4, app.basePath((_f = (_e = options === null || options === void 0 ? void 0 : options.vercel) === null || _e === void 0 ? void 0 : _e.path) !== null && _f !== void 0 ? _f : '/api').fetch(stdRequest)];
                             case 1:
                                 honoResponse = _g.sent();
                                 honoResponse.headers.forEach(function (value, name) {
@@ -143,7 +141,7 @@ var serve = function (app, options) {
                 fetch: app.fetch
             };
         case 'edge-light':
-            return (0, nextjs_1.handle)(app, (_d = (_c = options === null || options === void 0 ? void 0 : options.nextjs) === null || _c === void 0 ? void 0 : _c.path) !== null && _d !== void 0 ? _d : '/api');
+            return (0, nextjs_1.handle)(app.basePath((_d = (_c = options === null || options === void 0 ? void 0 : options.nextjs) === null || _c === void 0 ? void 0 : _c.path) !== null && _d !== void 0 ? _d : '/api'));
         case 'lagon':
             return app.fetch;
         case 'fastly':

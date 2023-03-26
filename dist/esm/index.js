@@ -1,4 +1,3 @@
-import { Hono } from 'hono';
 import { handle } from 'hono/nextjs';
 export function getRuntime() {
     const global = globalThis;
@@ -37,7 +36,6 @@ export const serve = (app, options) => {
         case 'node':
             if (global.process.env.VERCEL === '1') {
                 return async (vRequest, vResponse) => {
-                    const subApp = new Hono().route(options?.vercel?.path ?? '/api', app);
                     const stdRequest = new Request(`https://${global.process.env.VERCEL_URL}${vRequest.url}`, {
                         method: vRequest.method,
                         body: vRequest.body
@@ -45,7 +43,7 @@ export const serve = (app, options) => {
                     Object.keys(vRequest.headers).forEach((name) => {
                         stdRequest.headers.set(name, vRequest.headers[name]);
                     });
-                    const honoResponse = await subApp.fetch(stdRequest);
+                    const honoResponse = await app.basePath(options?.vercel?.path ?? '/api').fetch(stdRequest);
                     honoResponse.headers.forEach((value, name) => {
                         vResponse.setHeader(name, value);
                     });
@@ -55,7 +53,7 @@ export const serve = (app, options) => {
                 };
             }
             else {
-                return import('@hono/node-server').then(({ serve }) => { return serve(app); });
+                return import('@hono/node-server').then(({ serve }) => serve(app));
             }
         case 'bun':
             return {
@@ -63,7 +61,7 @@ export const serve = (app, options) => {
                 fetch: app.fetch
             };
         case 'edge-light':
-            return handle(app, options?.nextjs?.path ?? '/api');
+            return handle(app.basePath(options?.nextjs?.path ?? '/api'));
         case 'lagon':
             return app.fetch;
         case 'fastly':
