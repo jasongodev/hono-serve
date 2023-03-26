@@ -98,15 +98,7 @@ function getRuntime() {
 exports.getRuntime = getRuntime;
 var serve = function (app, options) {
     var _a, _b, _c, _d;
-    var runtime = getRuntime();
-    switch (runtime) {
-        case 'bun':
-            return {
-                port: (_b = (_a = options === null || options === void 0 ? void 0 : options.bun) === null || _a === void 0 ? void 0 : _a.port) !== null && _b !== void 0 ? _b : 3000,
-                fetch: app.fetch
-            };
-        case 'edge-light':
-            return (0, nextjs_1.handle)(app, (_d = (_c = options === null || options === void 0 ? void 0 : options.nextjs) === null || _c === void 0 ? void 0 : _c.path) !== null && _d !== void 0 ? _d : '/api');
+    switch (getRuntime()) {
         case 'node':
             if (global.process.env.VERCEL === '1') {
                 return function (vRequest, vResponse) { return __awaiter(void 0, void 0, void 0, function () {
@@ -145,6 +137,15 @@ var serve = function (app, options) {
                     return serve(app);
                 });
             }
+        case 'bun':
+            return {
+                port: (_b = (_a = options === null || options === void 0 ? void 0 : options.bun) === null || _a === void 0 ? void 0 : _a.port) !== null && _b !== void 0 ? _b : 3000,
+                fetch: app.fetch
+            };
+        case 'edge-light':
+            return (0, nextjs_1.handle)(app, (_d = (_c = options === null || options === void 0 ? void 0 : options.nextjs) === null || _c === void 0 ? void 0 : _c.path) !== null && _d !== void 0 ? _d : '/api');
+        case 'lagon':
+            return app.fetch;
         case 'fastly':
             app.fire();
     }

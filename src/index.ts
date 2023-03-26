@@ -66,30 +66,22 @@ export type HonoCloudflareReturn = Hono
 
 export type HonoFastlyReturn = Hono
 
+export type HonoLagonReturn = Hono
+
 export type HonoNextjsReturn = (req: Request) => Response | Promise<Response>
 
 export type HonoNodeReturn = nodeServerType | Promise<nodeServerType>
 
 export type HonoVercelNodeReturn = (req: VercelRequest, res: VercelResponse) => VercelResponse | Promise<VercelResponse>
 
-export type HonoServe = HonoBunReturn | HonoCloudflareReturn | HonoFastlyReturn | HonoNextjsReturn | HonoNodeReturn | HonoVercelNodeReturn
+export type HonoServe = HonoBunReturn | HonoCloudflareReturn | HonoFastlyReturn | HonoLagonReturn | HonoNextjsReturn | HonoNodeReturn | HonoVercelNodeReturn
 
 export const serve = <E extends Env>(app: Hono<E>, options?: HonoServeOptions): HonoServe => {
-  const runtime = getRuntime()
-  switch (runtime) {
-    case 'bun':
-      return {
-        port: options?.bun?.port ?? 3000,
-        fetch: app.fetch
-      }
-    case 'edge-light':
-      return handle(app, options?.nextjs?.path ?? '/api')
+  switch (getRuntime()) {
     case 'node':
       if (global.process.env.VERCEL === '1') {
         return async (vRequest: VercelRequest, vResponse: VercelResponse): Promise<VercelResponse> => {
           const subApp = new Hono().route(options?.vercel?.path ?? '/api', app)
-
-          // const trueURL = global.process.env.VERCEL_ENV === 'development' ? `https://${global.process.env.VERCEL_URL as string}${vRequest.url as string}` : vRequest.url as string
 
           // Transform vRequest into stdRequest which is compatible with Hono's fetch
           const stdRequest = new Request(`https://${global.process.env.VERCEL_URL as string}${vRequest.url as string}`, {
@@ -115,12 +107,17 @@ export const serve = <E extends Env>(app: Hono<E>, options?: HonoServeOptions): 
             .send(Buffer.from(await honoResponse.arrayBuffer()))
         }
       } else {
-        return import('@hono/node-server').then(({ serve }) => { return serve(app) })
-        /* return (async (): Promise<nodeServerType> => {
-          const { serve } = await import('@hono/node-server')
-          return serve(app)
-        })() */
+        return import('@hono/node-server').then(({ serve }) => serve(app))
       }
+    case 'bun':
+      return {
+        port: options?.bun?.port ?? 3000,
+        fetch: app.fetch
+      }
+    case 'edge-light':
+      return handle(app, options?.nextjs?.path ?? '/api')
+    case 'lagon':
+      return app.fetch
     case 'fastly':
       app.fire()
   }

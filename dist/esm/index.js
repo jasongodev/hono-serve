@@ -33,15 +33,7 @@ export function getRuntime() {
     return 'other';
 }
 export const serve = (app, options) => {
-    const runtime = getRuntime();
-    switch (runtime) {
-        case 'bun':
-            return {
-                port: options?.bun?.port ?? 3000,
-                fetch: app.fetch
-            };
-        case 'edge-light':
-            return handle(app, options?.nextjs?.path ?? '/api');
+    switch (getRuntime()) {
         case 'node':
             if (global.process.env.VERCEL === '1') {
                 return async (vRequest, vResponse) => {
@@ -63,8 +55,17 @@ export const serve = (app, options) => {
                 };
             }
             else {
-                return import('@hono/node-server').then(({ serve }) => { return serve(app); });
+                return import('@hono/node-server').then(({ serve }) => serve(app));
             }
+        case 'bun':
+            return {
+                port: options?.bun?.port ?? 3000,
+                fetch: app.fetch
+            };
+        case 'edge-light':
+            return handle(app, options?.nextjs?.path ?? '/api');
+        case 'lagon':
+            return app.fetch;
         case 'fastly':
             app.fire();
     }
