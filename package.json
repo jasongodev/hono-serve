@@ -1,6 +1,6 @@
 {
   "name": "hono-serve",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "A cross-compatible serve() function for hono apps. Just use 'export default serve(app)'. Works with Bun, Cloudflare Workers, Deno, Fastly Compute@Edge, Next.js, and Vercel runtimes.",
   "author": "Jason Go <jasongo@jasongo.net>",
   "license": "MIT",
@@ -33,7 +33,7 @@
   "dependencies": {
     "@hono/node-server": "^0.3.0",
     "@vercel/node": "^2.10.0",
-    "hono": "3.1.0"
+    "hono": "3.1.1"
   },
   "devDependencies": {
     "rimraf": "^4.4.0",
@@ -41,7 +41,7 @@
     "typescript": "^4.9.5"
   },
   "peerDependencies": {
-    "hono": "^3.1.0"
+    "hono": "^3.1.1"
   },
   "exports": {
     "import": "./dist/esm/index.js",
